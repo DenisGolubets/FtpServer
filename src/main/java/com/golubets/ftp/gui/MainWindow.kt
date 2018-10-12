@@ -1,10 +1,15 @@
-package com.golubets.ftp.gui
-
+package com.golubets.ftp
+import com.golubets.ftp.gui.FocusTraversalOnArray
 import com.golubets.ftp.services.FTPServer
 import com.golubets.ftp.services.PreferencesService
 import org.slf4j.LoggerFactory
 import java.awt.Toolkit
+import java.awt.datatransfer.Clipboard
+import java.awt.datatransfer.StringSelection
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 import java.io.IOException
+import java.net.InetAddress
 import javax.swing.*
 
 class MainWindow @Throws(IOException::class)
@@ -20,11 +25,13 @@ constructor() : JFrame() {
     private var isStarted = false
     private val chooser: JFileChooser
     private val preferences = PreferencesService()
+    private val connectionStr = JLabel()
 
     companion object {
         private val LOGGER = LoggerFactory.getLogger(MainWindow::class.java)
         const val DEFAULT_TITLE = "FTP Server"
         const val STARTED_TITLE = "FTP Server STARTED"
+
     }
 
     init {
@@ -114,6 +121,17 @@ constructor() : JFrame() {
         }
         loadPreferences()
 
+        connectionStr.setBounds(280, 25, 99, 45)
+        contentPane.add(connectionStr)
+        connectionStr.addMouseListener(object : MouseAdapter(){
+            override fun mouseClicked(p0: MouseEvent?) {
+                val cl: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
+                cl.setContents(StringSelection(connectionStr.text), null)
+            }
+        })
+        setConnectionStr()
+//        connectionStr.addMouseListener{}
+
         startBtn = JButton("Start")
         startBtn.addActionListener {
             if (isStarted) {
@@ -125,6 +143,7 @@ constructor() : JFrame() {
                     userValue.isEnabled = true
                     passwordValue.isEnabled = true
                 }
+
                 folderBtn.isEnabled = true
                 startBtn.text = "Start"
                 title = DEFAULT_TITLE
@@ -147,6 +166,10 @@ constructor() : JFrame() {
             userValue.isEnabled = false
             passwordValue.isEnabled = false
         }
+    }
+
+    private fun setConnectionStr() {
+        connectionStr.text = "${InetAddress.getLocalHost().hostAddress}:${getPort(portValue.text)}"
     }
 
 
@@ -184,6 +207,7 @@ constructor() : JFrame() {
     private fun fillAndStartServer() {
         savePreferences()
 
+
         if (getPort(portValue.text) == 0) {
             return
         }
@@ -192,6 +216,7 @@ constructor() : JFrame() {
         ftpServer!!.isAnonymous = isAnonymous.isEnabled
         ftpServer!!.setUser(userValue.text, passwordValue.password, folderValue.text)
         if (ftpServer!!.start()) {
+            setConnectionStr()
             isStarted = true
             portValue.isEnabled = false
             userValue.isEnabled = false

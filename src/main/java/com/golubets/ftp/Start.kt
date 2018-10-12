@@ -1,6 +1,5 @@
 package com.golubets.ftp
 
-import com.golubets.ftp.gui.MainWindow
 import com.golubets.ftp.services.FTPServer
 import org.slf4j.LoggerFactory
 import javax.swing.JDialog

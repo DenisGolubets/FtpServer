@@ -7,6 +7,7 @@ import org.apache.ftpserver.ftplet.FtpException
 import org.apache.ftpserver.listener.ListenerFactory
 import org.apache.ftpserver.usermanager.impl.BaseUser
 import org.slf4j.LoggerFactory
+import java.net.InetAddress
 
 class FTPServer {
     private var port: Int = 0
@@ -23,6 +24,10 @@ class FTPServer {
         port = 21
         userManager = UserManager()
     }
+    fun getConnectionString(): String {
+        return "${InetAddress.getLocalHost().hostAddress}:$port"
+    }
+
 
     fun setPort(port: Int) {
         this.port = port
